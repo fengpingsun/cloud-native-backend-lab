@@ -16,30 +16,22 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+var orders = new List<Order>();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+app.MapGet("/orders", () => orders);
 
-app.MapGet("/weatherforecast", () =>
+app.MapPost("/orders", (Order order) =>
 {
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+    order.Id = Guid.NewGuid();
+    orders.Add(order);
+    return Results.Ok(order);
+});
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+record Order
 {
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    public Guid Id { get; set; }
+    public string Product { get; set; }
+    public int Quantity { get; set; }
 }
